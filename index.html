@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nūr al-Haramayn — Islamic Portal</title>
+<meta name="description" content="Independent educational Haramain-inspired Quran, imam and prayer portal concept.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=20260912-fix1">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+<div id="splash"><div class="splash-mark">ح</div><div class="splash-name">NŪR AL-HARAMAYN</div><div class="loader"></div></div>
+
+<section id="login" class="login">
+  <div class="login-visual">
+    <div class="stars"></div><div class="crescent"></div><div class="visual-glow"></div>
+    <div class="sky-copy">
+      <div class="visual-kicker"><span class="kicker-dot"></span> A QUIET DIGITAL SANCTUARY</div>
+      <span class="arabic-bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</span>
+      <h1>Let your heart<br>return to the Qur'an.</h1>
+      <p>A calm space for recitation, prayer, reflection and learning — designed to feel spacious on every screen.</p>
+      <div class="visual-chips"><span>114 Surahs</span><span>Prayer times</span><span>Recitations</span></div>
+    </div>
+    <div class="visual-footer"><div><b>114</b><small>Surahs</small></div><div><b>24/7</b><small>Reflection</small></div><div><b>EN · AR</b><small>Languages</small></div></div>
+    <div class="mosque"></div>
+  </div>
+  <div class="login-box">
+    <div class="mini-brand"><b>ح</b><span><strong>NŪR AL-HARAMAYN</strong><small>Islamic Portal</small></span></div>
+    <span class="eyebrow">WELCOME BACK</span>
+    <h2>Enter the sanctuary<br><i>of reflection.</i></h2>
+    <p class="muted">Sign in to continue to your personalized Quran and Haramain dashboard.</p>
+    <div class="auth-choice">
+      <div class="google-login">
+        <div id="googleSignInButton"></div>
+        <div id="googleStatus" class="google-status"></div>
+      </div>
+      <div class="google-divider"><span>OR CONTINUE AS GUEST</span></div>
+      <button class="guest-btn" id="guestLogin" type="button">Continue as Guest <span>→</span></button>
+      <div id="guestStatus" class="google-status"></div>
+    </div>
+    <small class="disclaimer">Independent educational/fan concept. Not an official Haramain website.</small>
+  </div>
+</section>
+
+<section id="app" class="app hidden">
+<aside id="side">
+  <div class="logo"><b>ح</b><span><strong>NŪR AL-HARAMAYN</strong><small>Islamic Portal</small></span></div>
+  <nav>
+    <button class="nav active" data-page="home">⌂ <span>Overview</span></button>
+    <button class="nav" data-page="imams">۞ <span>Imams</span></button>
+    <button class="nav" data-page="prayer">◷ <span>Prayer times</span></button>
+    <button class="nav" data-page="quran">☷ <span>Qur'an</span></button>
+    <button class="nav" data-page="media">▶ <span>Media</span></button>
+    <button class="nav" data-page="library">▣ <span>Library</span></button>
+  </nav>
+  <div class="side-bottom">
+    <button class="nav" id="dark">☾ <span>Dark mode</span></button>
+    <button class="nav" id="logout">↪ <span>Sign out</span></button>
+  </div>
+</aside>
+
+<main>
+<header>
+  <button id="menu" class="hamb">☰</button>
+  <div class="search">⌕ <input id="search" placeholder="Search imams, surahs, lectures..."></div>
+  <div class="actions"><button id="arabic">عربي</button><button id="bell">◌</button><div class="profile">GM</div></div>
+</header>
+<div id="content"></div>
+</main>
+</section>
+<div id="toast"></div>
+<script src="app.js?v=20260912-fix1"></script>
+</body>
+</html>
