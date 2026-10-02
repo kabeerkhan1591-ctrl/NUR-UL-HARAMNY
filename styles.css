@@ -671,6 +671,15 @@ header {
   background: var(--green);
   color: #fff;
 }
+
+.play {
+  cursor: pointer;
+  font-size: 14px;
+  transition: transform .18s ease, opacity .18s ease;
+}
+.play:hover { transform: scale(1.06); }
+.play.is-playing { transform: scale(1.06); }
+.play:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 .track {
   flex: 1;
 }

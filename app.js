@@ -517,9 +517,17 @@ const RECITERS = [
     base: "https://download.quranicaudio.com/quran/sa3d_al-ghaamidi/complete/",
   },
 ];
-function audioUrl(reciterId, surah) {
+function audioUrls(reciterId, surah) {
   const rec = RECITERS.find((x) => x.id === reciterId) || RECITERS[0];
-  return rec.base + String(surah).padStart(3, "0") + ".mp3";
+  const file = String(surah).padStart(3, "0") + ".mp3";
+  const urls = [rec.base + file];
+  // Public fallback CDN for Yasser ad-Dussary if the primary QuranicAudio
+  // host is unavailable from a visitor's network.
+  if (rec.id === "yasser") urls.push(`https://cdn.mp3quran.net/audio/yasser-dosari/r1/${file}`);
+  return urls;
+}
+function audioUrl(reciterId, surah) {
+  return audioUrls(reciterId, surah)[0];
 }
 function audioPlayer() {
   if (window.currentUser?.role === "guest")
@@ -531,62 +539,137 @@ function initAudio() {
     reciter = document.querySelector("#reciterSelect"),
     surah = document.querySelector("#surahSelect");
   if (!audio || !reciter || !surah) return;
-  let currentSurah = 1;
-  function load(autoplay = false) {
+
+  let currentSurah = Number(surah.value) || 1;
+  let currentButton = null;
+  let requestId = 0;
+
+  const status = (message) => {
+    const el = document.querySelector("#audioStatus");
+    if (el) el.textContent = message;
+  };
+
+  const setButtonState = (button, playing) => {
+    if (!button) return;
+    button.textContent = playing ? "❚❚" : "▶";
+    button.setAttribute("aria-label", playing ? "Pause Surah" : "Play Surah");
+    button.classList.toggle("is-playing", playing);
+  };
+
+  const resetButtons = () => {
+    document.querySelectorAll('.quran-row .play.is-playing').forEach((button) => {
+      setButtonState(button, false);
+    });
+    currentButton = null;
+  };
+
+  function updateTrackInfo() {
+    const rec = RECITERS.find((x) => x.id === reciter.value) || RECITERS[0];
+    const title = SURAH[currentSurah - 1];
+    if (!title) return;
+    const titleEl = document.querySelector("#audioTitle");
+    const metaEl = document.querySelector("#audioMeta");
+    if (titleEl) titleEl.textContent = `${rec.name} — ${title[0]}`;
+    if (metaEl) metaEl.textContent = `Surah ${currentSurah} • ${title[1]} • Nūr al-Haramayn MP3`;
+  }
+
+  async function playCurrent(button = null) {
+    if (!audio.src) return;
+    try {
+      await audio.play();
+      resetButtons();
+      currentButton = button || document.querySelector(`.quran-row .play[data-arg="${currentSurah}"]`);
+      setButtonState(currentButton, true);
+      status("Playing — Nūr al-Haramayn MP3");
+    } catch (err) {
+      console.error("Qur'an audio playback failed:", err);
+      resetButtons();
+      status("Audio is ready, but playback was blocked. Press the player ▶ button below.");
+    }
+  }
+
+  function load(autoplay = false, button = null) {
+    const thisRequest = ++requestId;
     currentSurah = Number(surah.value) || 1;
     const rec = RECITERS.find((x) => x.id === reciter.value) || RECITERS[0];
     const title = SURAH[currentSurah - 1];
-    audio.pause();
-    audio.removeAttribute("src");
-    audio.src = audioUrl(rec.id, currentSurah);
-    audio.load();
-    document.querySelector("#audioTitle").textContent =
-      `${rec.name} — ${title[0]}`;
-    document.querySelector("#audioMeta").textContent =
-      `Surah ${currentSurah} • ${title[1]} • Nūr al-Haramayn MP3`;
-    document.querySelector("#audioStatus").textContent =
-      "Loading audio source…";
-    if (autoplay)
-      audio
-        .play()
-        .catch(
-          () =>
-            (document.querySelector("#audioStatus").textContent =
-              "Ready — press play"),
-        );
+    if (!title) return;
+
+    resetButtons();
+    const sources = audioUrls(rec.id, currentSurah);
+    let sourceIndex = 0;
+
+    const setSource = () => {
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+      audio.src = sources[sourceIndex];
+      audio.preload = "metadata";
+    };
+
+    const handleSourceError = () => {
+      if (thisRequest !== requestId) return;
+      if (sourceIndex < sources.length - 1) {
+        sourceIndex += 1;
+        status("Primary audio source unavailable — trying backup…");
+        audio.addEventListener("error", handleSourceError, { once: true });
+        setSource();
+        if (autoplay) playCurrent(button);
+        return;
+      }
+      resetButtons();
+      status("This recitation could not be loaded. Check your connection or choose another reciter.");
+    };
+
+    audio.addEventListener("error", handleSourceError, { once: true });
+    setSource();
+    updateTrackInfo();
+    status("Loading Nūr al-Haramayn MP3…");
+
+    // Calling play() after assigning the source is more reliable than waiting
+    // for canplay, because waiting can lose the user's click activation.
+    if (autoplay) playCurrent(button);
   }
-  audio.addEventListener(
-    "loadstart",
-    () =>
-      (document.querySelector("#audioStatus").textContent =
-        "Loading Nūr al-Haramayn MP3…"),
-  );
-  audio.addEventListener(
-    "loadedmetadata",
-    () =>
-      (document.querySelector("#audioStatus").textContent =
-        "Audio source loaded"),
-  );
-  audio.addEventListener(
-    "canplay",
-    () =>
-      (document.querySelector("#audioStatus").textContent =
-        "Ready — press play"),
-  );
-  audio.addEventListener(
-    "error",
-    () =>
-      (document.querySelector("#audioStatus").textContent =
-        "This stream could not be loaded. Try another reciter or check your connection."),
-  );
-  reciter.onchange = () => load(false);
-  surah.onchange = () => load(false);
-  window.playSurah = (n) => {
-    surah.value = String(n);
-    load(true);
+
+  audio.addEventListener("loadstart", () => status("Loading Nūr al-Haramayn MP3…"));
+  audio.addEventListener("loadedmetadata", () => status("Audio source loaded — press ▶ to play"));
+  audio.addEventListener("canplay", () => {
+    if (audio.paused) status("Ready — press ▶ to play");
+  });
+  audio.addEventListener("playing", () => {
+    setButtonState(currentButton, true);
+    status("Playing — Nūr al-Haramayn MP3");
+  });
+  audio.addEventListener("pause", () => {
+    if (!audio.ended) {
+      setButtonState(currentButton, false);
+      status("Paused");
+    }
+  });
+  audio.addEventListener("ended", () => {
+    setButtonState(currentButton, false);
+    currentButton = null;
+    status("Finished — choose another Surah to listen again");
+  });
+
+  reciter.addEventListener("change", () => load(false));
+  surah.addEventListener("change", () => load(false));
+
+  window.playSurah = (n, button = null) => {
+    const number = Number(n);
+    if (!Number.isInteger(number) || number < 1 || number > SURAH.length) return;
+    if (currentSurah === number && audio.src && !audio.paused) {
+      audio.pause();
+      return;
+    }
+    surah.value = String(number);
+    load(true, button);
   };
+
+  window.pauseSurah = () => audio.pause();
   load(false);
 }
+
 function quran() {
   content.innerHTML = `<div class="page">${head("THE QUR'AN", "Nūr al-Haramayn Recitation Studio", "Choose your favorite reciter, then any of the 114 Surahs. Names and numbering follow the Qur'an order.")}${audioPlayer()}<div class="panel" style="margin-top:18px"><div class="section-title"><span class="eyebrow">114 SURAH LIBRARY</span><h3>Choose a Surah</h3></div>${SURAH.map((x, i) => `<div class="quran-row"><button class="play" data-action="play" data-arg="${i + 1}">▶</button><div class="track"><b>${String(i + 1).padStart(3, "0")} • ${x[0]}</b><small>${x[1]} • Nūr al-Haramayn MP3</small><div class="bar"><i style="width:${35 + (i % 6) * 10}%"></i></div></div><span class="arabic">${x[1]}</span></div>`).join("")}</div></div>`;
   initAudio();
@@ -1036,7 +1119,7 @@ document.addEventListener("click", (e) => {
       break;
     case "play":
       if (window.currentUser?.role === "guest") requireLogin("audio");
-      else window.playSurah?.(Number(arg));
+      else window.playSurah?.(Number(arg), el);
       break;
     case "openurl":
       window.open(arg, "_blank");
@@ -1049,7 +1132,7 @@ document.addEventListener("click", (e) => {
       break;
     case "listenSurah":
       go("quran");
-      setTimeout(() => window.playSurah?.(Number(arg)), 80);
+      setTimeout(() => window.playSurah?.(Number(arg), document.querySelector(`.quran-row .play[data-arg="${arg}"]`)), 80);
       break;
   }
 });
