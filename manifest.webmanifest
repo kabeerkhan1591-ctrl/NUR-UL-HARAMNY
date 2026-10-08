@@ -2,11 +2,11 @@
   "name": "Nūr al-Haramayn — Islamic Portal",
   "short_name": "Nūr al-Haramayn",
   "description": "A calm space for Qur'an recitation, prayer, reflection and learning.",
-  "start_url": "/",
+  "start_url": "https://gown-spiffy-cow.abasthan.app/",
   "display": "standalone",
   "background_color": "#0b1512",
   "theme_color": "#0b1512",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "lang": "en",
   "dir": "ltr",
   "icons": [
@@ -22,5 +22,10 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "id": "nur-ul-haramayn",
+  "scope": "https://gown-spiffy-cow.abasthan.app/",
+  "display_override": [
+    "window-controls-overlay"
   ]
 }
