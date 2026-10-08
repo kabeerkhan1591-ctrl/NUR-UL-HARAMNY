@@ -1,0 +1,26 @@
+{
+  "name": "Nūr al-Haramayn — Islamic Portal",
+  "short_name": "Nūr al-Haramayn",
+  "description": "A calm space for Qur'an recitation, prayer, reflection and learning.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b1512",
+  "theme_color": "#0b1512",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

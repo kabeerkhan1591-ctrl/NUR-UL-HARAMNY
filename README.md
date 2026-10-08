@@ -23,3 +23,10 @@ Guest sessions can browse the public portal. The in-site Library and Qur'an MP3 
 
 ## Production note
 The included in-memory session/rate-limit stores are suitable for a single local/dev instance. Production deployments should move session/rate-limit state to a persistent/shared store and run behind HTTPS and a trusted reverse proxy/WAF.
+
+
+## PWA
+This project now includes a web app manifest, service worker, and install icons. Serve it over HTTPS (or localhost during development) for browsers to offer installation.
+
+## Deployment
+This app uses Node.js and the included `server.js`, so deploy it as a Node web service. A simple option is Render: create a Web Service from this project, use Node 20+, build command `npm install`, and start command `npm start`. Set your environment variables there as described in the existing configuration. The public site must use HTTPS for PWA installation and secure cookies.
